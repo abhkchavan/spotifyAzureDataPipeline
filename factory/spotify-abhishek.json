@@ -1,0 +1,9 @@
+{
+	"name": "spotify-abhishek",
+	"location": "southindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "b280bd25-cce9-4e8c-bbde-07a8fdf2d2af",
+		"tenantId": "5829f710-2e29-4ce8-83da-4468c356edc5"
+	}
+}
