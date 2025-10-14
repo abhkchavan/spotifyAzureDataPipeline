@@ -1,0 +1,6 @@
+{
+	"name": "SqltoBronzeLakehouse",
+	"properties": {
+		"annotations": []
+	}
+}
