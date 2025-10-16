@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ReadJsonDynamic",
+				"name": "lastcdc",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -42,7 +42,13 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "ReadJsonDynamic",
+						"activity": "lastcdc",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Current",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -60,7 +66,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "@concat(\n    'SELECT * FROM ',\n    pipeline().parameters.schema, '.', pipeline().parameters.table,\n    ' WHERE ',\n    pipeline().parameters.cdc,  ' > ''',\n    activity('ReadJsonDynamic').output.firstRow.cdc,''''\n)\n",
+							"value": "@concat(\n    'SELECT * FROM ',\n    pipeline().parameters.schema, '.', pipeline().parameters.table,\n    ' WHERE ',\n    pipeline().parameters.cdc,  ' > ''',\n    activity('lastcdc').output.firstRow.cdc,''''\n)\n",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -102,12 +108,134 @@
 								"type": "Expression"
 							},
 							"filename": {
-								"value": "@concat(pipeline().parameters.table,'_',formatDateTime(utcnow()))",
+								"value": "@concat(pipeline().parameters.table,'_',variables('currenttime'))",
 								"type": "Expression"
 							}
 						}
 					}
 				]
+			},
+			{
+				"name": "Current",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currenttime",
+					"value": {
+						"value": "@addMinutes(addHours(utcNow(), 5), 30)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "updatelastcdc",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "maxcdc",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"additionalColumns": {
+							"type": "Expression",
+							"value": "@activity('maxcdc').output.resultSets[0].rows[0].cdc"
+						},
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "Json4",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "bronze",
+							"folder": "cdc",
+							"filename": "empty.json"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Json4",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "bronze",
+							"folder": "cdc",
+							"filename": "cdc.json"
+						}
+					}
+				]
+			},
+			{
+				"name": "maxcdc",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "CopyToLakeHouse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "SELECT MAX(@{pipeline().parameters.cdc}) as cdc from @{pipeline().parameters.schema}.@{pipeline().parameters.table}",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
 		"parameters": {
@@ -119,6 +247,11 @@
 			},
 			"cdc": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"currenttime": {
+				"type": "String"
 			}
 		},
 		"annotations": []
