@@ -76,7 +76,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "SELECT * FROM @{item().schema}.@{item().table} where @{item().cdc} \n> ' @{if(empty(item().from_date),item().cdc,item().from_date)}'",
+										"value": "SELECT * FROM @{item().schema}.@{item().table} where @{item().cdc} \n> ' @{if(empty(item().from_date),activity('lastcdc').output.firstRow.cdc,item().from_date)}'",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
