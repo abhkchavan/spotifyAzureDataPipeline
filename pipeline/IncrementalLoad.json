@@ -8,6 +8,10 @@
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.loop_value",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "lastcdc",
@@ -114,11 +118,11 @@
 									"parameters": {
 										"container": "bronze",
 										"folder": {
-											"value": "@pipeline().parameters.table",
+											"value": "@{item().table}",
 											"type": "Expression"
 										},
 										"filename": {
-											"value": "@concat(pipeline().parameters.table,'_',variables('currenttime'))",
+											"value": "@concat(item().table,'_',variables('currenttime'))",
 											"type": "Expression"
 										}
 									}
@@ -179,11 +183,11 @@
 												"parameters": {
 													"container": "bronze",
 													"folder": {
-														"value": "@pipeline().parameters.table",
+														"value": "@{item().table}",
 														"type": "Expression"
 													},
 													"filename": {
-														"value": "@concat(pipeline().parameters.table,'_',variables('currenttime'))",
+														"value": "@concat(item().table,'_',variables('currenttime'))",
 														"type": "Expression"
 													}
 												}
