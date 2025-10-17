@@ -256,7 +256,7 @@
 												"parameters": {
 													"container": "bronze",
 													"folder": {
-														"value": "@concat(pipeline().parameters.table, '_cdc')",
+														"value": "@{item().table}",
 														"type": "Expression"
 													},
 													"filename": "empty.json"
@@ -270,7 +270,7 @@
 												"parameters": {
 													"container": "bronze",
 													"folder": {
-														"value": "@concat(pipeline().parameters.table, '_cdc')",
+														"value": "@{item().table}",
 														"type": "Expression"
 													},
 													"filename": "cdc.json"
@@ -299,7 +299,7 @@
 												{
 													"type": "Query",
 													"text": {
-														"value": "SELECT MAX(@{pipeline().parameters.cdc}) as cdc from @{pipeline().parameters.schema}.@{pipeline().parameters.table}",
+														"value": "SELECT MAX(@{item().cdc}) as cdc from @{item().schema}.@{item().table}",
 														"type": "Expression"
 													}
 												}
