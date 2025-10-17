@@ -260,7 +260,7 @@
 												"parameters": {
 													"container": "bronze",
 													"folder": {
-														"value": "@{item().table}",
+														"value": "@{item().table}_cdc",
 														"type": "Expression"
 													},
 													"filename": "empty.json"
@@ -274,7 +274,7 @@
 												"parameters": {
 													"container": "bronze",
 													"folder": {
-														"value": "@{item().table}",
+														"value": "@{item().table}_cdc",
 														"type": "Expression"
 													},
 													"filename": "cdc.json"
