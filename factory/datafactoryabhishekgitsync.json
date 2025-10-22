@@ -1,0 +1,9 @@
+{
+	"name": "datafactoryabhishekgitsync",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "32239fc8-04a1-4234-b09a-585a22456a0c",
+		"tenantId": "5829f710-2e29-4ce8-83da-4468c356edc5"
+	}
+}
